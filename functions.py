@@ -1,13 +1,31 @@
-import numpy as np
+from numpy import random, full 
 
 class BattleShip:
-
-    def __init__(self, id):
+    """
+    Immutable variables:
+        -board: array of shape (2, 10, 10)
+        -boats: for key is length and for value, number of boats.
+    
+    Functions:
+        -rand_point: Calculates a random point the array.
+        -neighbor: Finds all possible free positions arround the given position argument.
+        -direction: Calculates within the board bondaries, all possible directions
+                    to locate a boat with length 'length'.
+        -rand_direction: With the possible directions extracted from the function 'direction',
+                        this function chooses a random direction from the output (list).
+        -boat_placer: Rewrites the array board with the placed boat.
+        -
+        -
+        -
+    """
+    def __init__(self, id=str):
         self.id = id
+        self.board = full((2, 10, 10), " ")
+        self.boats = {1:4, 2:3, 3:2, 4:1}
     
     def rand_point(board, matrix=int):
         """
-        Calculates a random point the array.
+        Calculates a random point in the array.
 
         Parameters:
             -board: type array. A 3 dimensional matrix.
@@ -23,17 +41,18 @@ class BattleShip:
         """
         try:
             if int(matrix) < board.shape[0]:
-                point = tuple(np.random.randint((board.shape[1]+1, board.shape[2]+1)))
+                point = tuple(random.randint((board.shape[1]+1, board.shape[2]+1)))
             
-            return (int(matrix),) + point
+                return (int(matrix),) + point
+            else:
+                raise IndexError
 
-        except UnboundLocalError as uble:
-            print(f"""{uble}
-                Possible errors:
-                    -Matrix value out of bounds
-                    -Board type not array
-                    -Board dimensions not equal to two
-            """)
+        except IndexError:
+            print("""Possible errors:
+    -Matrix value out of bounds
+    -Board type not array
+    -Board dimensions not equal to two""")
+            
     
     def neighbor(board, position=tuple):
         """
@@ -94,9 +113,9 @@ class BattleShip:
 
         except IndexError as ie:
             print(f"""{ie}
-                REMEMBER: your board is shape {board.shape}.
-                    -Your board must have a shape of (2, 10, 10)
-                    -The position must belong within the board bonds
+            REMEMBER: your board is shape {board.shape}.
+                -Your board must have a shape of (2, 10, 10)
+                -The position must belong within the board bonds
             """)
 
     def direction(board, position=tuple, length=int):
@@ -162,8 +181,8 @@ class BattleShip:
                 -Your board must have a shape of (2, 10, 10).
                 -The position must belong within the board bonds.
             """)
-        except ValueError as ve:
-            print(f"""The length must be an int number equal or higher than 0 and smaller than 9.""")
+        except ValueError:
+            print("""The length must be an int number equal or higher than 0 and smaller than 9.""")
 
     def rand_direction(board, position=tuple, length=int):
         """
@@ -179,7 +198,7 @@ class BattleShip:
             A string.
         """
         directions = BattleShip.direction(board, position, length)
-        d = np.random.choice(directions)
+        d = random.choice(directions)
         return d
 
     def boat_placer(board, position=tuple, length=int, direction=str):
@@ -212,3 +231,54 @@ class BattleShip:
             board[p[0], p[1], f_p[2]:p[2]+1] = "O"
         else: # d == "E":
             board[p[0], p[1], p[2]:p[2]+l] = "O"
+
+    def shot(self, enemy, difficulty='easy'):
+        """
+        Randomly place an 'X' in the array if a boat is kicked.
+        If not, leaves a mark '+' in the array of 'water' reached.
+        """
+        # First get the tuple shot
+        # shot is an array of two dimensions of type tuple
+        if enemy.id != 'Machine':
+            if difficulty == 'easy':
+                shot = (0,) + tuple(random.randint(self.board.shape[1:]))
+
+                # Writing the shot in the enemys's matrix 0 and to the matrix 1 of the machine
+                if enemy.board[shot] == "O": # Boat
+                    enemy.board[shot] = "X"
+                    self.board[1, shot[1], shot[2]] = "X"
+
+                elif enemy.board[shot] == " ": # Water
+                    enemy.board[shot] = "+"
+                    self.board[1, shot[1], shot[2]] = "+"
+
+                else: # If it's 'X' or '+'
+                    BattleShip.shot(self, enemy)
+
+            else: # Difficulty = 'normal'
+                # Code
+                pass
+            
+        else: # If the shooter is the user
+            print("Select a position to shoot.")
+
+            # Asking for coordinates
+            y = (int(input("Vertical axis:")),)
+            x = (int(input("Horizontal axis:")),)
+            shot = (0,) + y + x
+            print(y + x)
+
+            # Writing the shot in the machine's matrix 0 and to the matrix 1 of the enemy
+            if enemy.board[shot] in ['O', " "]:
+
+                if enemy.board[shot] == "O": # Boat
+                    enemy.board[shot] = "X"
+                    self.board[1, shot[1], shot[2]] = "X"
+
+                else: # Water
+                    enemy.board[shot] = "+"
+                    self.board[1, shot[1], shot[2]] = "+"
+
+            else:
+                print("Coordinates already chosen before, try again.")
+                BattleShip.shot(self, enemy)
