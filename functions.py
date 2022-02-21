@@ -41,9 +41,14 @@ class BattleShip:
         """
         try:
             if int(matrix) < board.shape[0]:
-                point = tuple(random.randint((board.shape[1]+1, board.shape[2]+1)))
+                point = (int(matrix),) + tuple(random.randint((board.shape[1]+1, board.shape[2]+1)))
+                
+                if board[point] == " ":
+                    return point
+
+                else:
+                    BattleShip.rand_point(board, matrix)
             
-                return (int(matrix),) + point
             else:
                 raise IndexError
 
@@ -234,8 +239,7 @@ class BattleShip:
 
     def shot(self, enemy, difficulty='easy'):
         """
-        Randomly place an 'X' in the array if a boat is kicked.
-        If not, leaves a mark '+' in the array of 'water' reached.
+        Description
         """
         # First get the tuple shot
         # shot is an array of two dimensions of type tuple
@@ -282,3 +286,13 @@ class BattleShip:
             else:
                 print("Coordinates already chosen before, try again.")
                 BattleShip.shot(self, enemy)
+    
+    def boat_placer_loop(board, point, boats):
+        if boats[4]
+            for k, v in boats.items():
+                # Random points
+                u_p = BattleShip.rand_point(board, 0)
+                # Random possible directions
+                u_d = BattleShip.direction(board, u_p, v)
+                # Placing it
+                BattleShip.boat_placer(board, u_p, v, u_d)
