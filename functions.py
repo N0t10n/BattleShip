@@ -23,36 +23,23 @@ class BattleShip:
         self.board = full((2, 10, 10), " ")
         self.boats = {1:4, 2:3, 3:2, 4:1}
     
-    def rand_point(self, matrix=int):
+    def rand_point(self, matrix=0):
         """
         Calculates a random point in the array.
 
         Parameters:
             -matrix: type int. The matrix where the point is generated.
         
-        Errors:
-            -matrix value out of bounds
-
         Return:
-            Returns a random point in the given matrix of type tuple.
+            A random point in the given matrix of type tuple.
         """
-        try:
-            if int(matrix) < self.board.shape[0]:
-                point = (int(matrix),) + tuple(random.randint((self.board.shape[1], self.board.shape[2])))
-                
-                if self.board[point] == " ":
-                    return point
+        point = (matrix,) + tuple(random.randint((self.board.shape[1], self.board.shape[2])))
 
-                else:
-                    BattleShip.rand_point(self, matrix)
-            
-            else:
-                raise IndexError
-
-        except IndexError:
-            print("""Possible errors:
-    -Matrix value out of bounds""")
-            BattleShip.rand_point(self, matrix)
+        if self.board[point] == " ":
+            return point
+        
+        else:
+            return BattleShip.rand_point(self)
             
     
     def neighbor(board, position=tuple):
@@ -123,93 +110,69 @@ class BattleShip:
                 -The position must belong within the board bonds
             """)
 
-    def direction(self, position=tuple, length=int):
+    def boat_placer(self, position=tuple, length=int):
         """
-        Calculates within the board bondaries, all possible directions
-        to locate a boat with length 'length' and gives a single direction as output.
-
-        Parameters:
-            -position: type tuple. The start boat coordinates.
-            -length: boat length as integer.
+        From position this function calculates all possible directions where a boat can be placed.
+        Once got that, randomly gets a direction and finally place the boat in the board.
 
         Return:
-            Randomly a possible directions mentioned as string:
-            North, South, West, East
+            Nothing. Rewrites the self.board
         """
         p = position
-        l = int(length - 1)
-        c = {"N":0, "S":0, "E":0, "W":0}
+        l = length
+        c = {"N":0, "S":0, "E":0, "W":0} # Coordinates
 
-        if self.board[p] != "O":
+        if self.board[p] == " ":
             # Vertical axis
             # Down
             if p[1]+l < 10:
-                x = self.board[p[0], p[1]:p[1]+l, p[2]] == " "
-                for i in x:
-                    if i == True:
-                        c['S'] += 1
+                x = self.board[(0,), p[1]:p[1]+l, p[2]] == " "
+                if x.all() == True:
+                    c['S'] = 1
             # Up
             if p[1]-l >= 0:
-                x = self.board[p[0], p[1]:p[1]-l:-1, p[2]] == " "
-                for i in x:
-                    if i == True:
-                        c['N'] += 1
+                x = self.board[(0,), p[1]:p[1]-l:-1, p[2]] == " "
+                if x.all() == True:
+                    c['N'] = 1
 
             # Horizontal axis
             # Right
             if p[2]+l < 10:
-                x = self.board[p[0], p[1], p[2]:p[2]+l] == " "
-                for i in x:
-                    if i == True:
-                        c['E'] += 1
+                x = self.board[(0,), p[1], p[2]:p[2]+l] == " "
+                if x.all() == True:
+                    c['E'] = 1
             # Left
             if p[2]-l >= 0:
-                x = self.board[p[0], p[1], p[2]:p[2]-l:-1] == " "
-                for i in x:
-                    if i == True:
-                        c['W'] += 1
+                x = self.board[(0,), p[1], p[2]:p[2]-l:-1] == " "
+                if x.all() == True:
+                    c['W'] = 1
             
-            # Here compares which direction is equal to the length to be listed in "d"
-            d = [k for k, v in c.items() if v == l]
+            # Here compares which direction is equal to True to be listed in "d"
+            d = [k for k, v in c.items() if v == True] # Directions
 
+            if d == []:
+                # It's executed is the position doesn't have any possible direction
+                return BattleShip.boat_placer(self, BattleShip.rand_point(self), length)
+
+            else:
             # With the all possible directions now randomly stores one of them
-            rand_d = random.choice(d)
+                rand_d = random.choice(d)
 
-            return rand_d
+                # And finally here replaces those free spaces into "O" in the board
+                if rand_d == "N":
+                    f_p = ((0,), p[1]+1-l, p[2])
+                    self.board[(0,), p[1]:p[1]-l:-1, p[2]] = "O"
+                elif rand_d == "S":
+                    self.board[(0,), p[1]:p[1]+l, p[2]] = "O"
+                elif rand_d == "W":
+                    f_p = ((0,), p[1], p[2]+1-l)
+                    self.board[(0,), p[1], f_p[2]:p[2]+1] = "O"
+                else: # d == "E":
+                    self.board[(0,), p[1], p[2]:p[2]+l] = "O"
 
         else:
-            print("There's no directions availabe")
-
-    def boat_placer(self, position=tuple, length=int, direction=str):
-        """
-        Rewrites the array board with the placed boat.
-
-        Parameters:
-            -board: type array. A 3 dimensional matrix
-            -position: type tuple. The start boat coordinates.
-            -length: boat length as integer.
-            -direction: string type. Direction were the boat will be placed in the matrix coordinates.
-        
-        Return:
-            It doesn't return anything. Rewrites the current array with 'O'
-        """
-        d = direction
-        p = position
-        l = length
-
-        # Indexing backwards in negative axis never lands in 0, always in -1
-        # But the array is indexed from 0 to 9 in both axis
-        # So for 'N' and 'W' directions we must slice rather in positive
-        if d == "N":
-            f_p = (p[0], p[1]+1-l, p[2])
-            self.board[p[0], p[1]:p[1]-l:-1, p[2]] = "O"
-        elif d == "S":
-            self.board[p[0], p[1]:p[1]+l, p[2]] = "O"
-        elif d == "W":
-            f_p = (p[0], p[1], p[2]+1-l)
-            self.board[p[0], p[1], f_p[2]:p[2]+1] = "O"
-        else: # d == "E":
-            self.board[p[0], p[1], p[2]:p[2]+l] = "O"
+            # It's executed is the position is already "O"
+            return BattleShip.boat_placer(self, BattleShip.rand_point(self), length)
 
     def shot(self, enemy, difficulty='easy'):
         """
@@ -263,14 +226,10 @@ class BattleShip:
     
     def boat_placer_loop(self):
         
+        # Keys are the boat length and values the number of boats per key
         for k, v in self.boats.items():
             for i in range(v):
-                # Random points
-                u_p = BattleShip.rand_point(self, 0)
-                # Random possible directions
-                u_d = BattleShip.direction(self, u_p, k)
+                # Random point
+                u_p = BattleShip.rand_point(self)
                 # Placing it
-                BattleShip.boat_placer(self, u_p, k, u_d)
-            
-
-        
+                BattleShip.boat_placer(self, u_p, k)
