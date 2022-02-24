@@ -1,11 +1,7 @@
-from numpy import random, full 
+from numpy import random, full, array2string
 
 class BattleShip:
     """
-    Immutable variables:
-        -board: array of shape (2, 10, 10)
-        -boats: for key is length and for value, number of boats.
-    
     Functions:
         -rand_point: Calculates a random point the array.
         -neighbor: Finds all possible free positions arround the given position argument.
@@ -18,10 +14,12 @@ class BattleShip:
         -
         -
     """
+
     def __init__(self, id=str):
         self.id = id
         self.board = full((2, 10, 10), " ")
         self.boats = {1:4, 2:3, 3:2, 4:1}
+        self.life = 20 # Total number of boat cells
     
     def rand_point(self, matrix=0):
         """
@@ -42,16 +40,12 @@ class BattleShip:
             return BattleShip.rand_point(self)
             
     
-    def neighbor(board, position=tuple):
+    def neighbor(self, position=tuple):
         """
         Finds all possible free positions arround the given position argument.
 
         Parameters:
-            -board: type array. A 3 dimensional matrix.
             -position: type tuple. The position where the function will work on.
-        
-        Errors:
-            -IndexError: if the value position is out of board shape.
 
         Return:
             A dictionary with the position argument as key,
@@ -61,54 +55,46 @@ class BattleShip:
         pos_list = []
         pos = {}
 
-        try:
-            if board[p] == "O":
-                # Above
-                if p[1] > 0:
-                    if board[p[0], p[1]-1, p[2]] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2],)))
-                # Below
-                if p[1] < 9:
-                    if board[p[0], p[1]+1, p[2]] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2],)))
-                # Left
-                if p[2] > 0:
-                    if board[p[0], p[1], p[2]-1] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1],) + (p[2]-1,)))
-                # Right
-                if p[2] < 9:
-                    if board[p[0], p[1], p[2]+1] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1],) + (p[2]+1,)))
-                # Above-right
-                if p[1] > 0 and p[2] < 9:
-                    if board[p[0], p[1]-1, p[2]+1] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2]+1,)))
-                # Above-left
-                if p[1] > 0 and p[2] > 0:
-                    if board[p[0], p[1]-1, p[2]-1] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2]-1,)))
-                # Below-right
-                if p[1] < 9 and p[2] < 9:
-                    if board[p[0], p[1]+1, p[2]+1] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2]+1,)))
-                # Below-left
-                if p[1] < 9 and p[2] > 0:
-                    if board[p[0], p[1]+1, p[2]-1] == " ":
-                        pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2]-1,)))
+        if self.board[p] == " ":
+            # Above
+            if p[1] > 0:
+                if self.board[p[0], p[1]-1, p[2]] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2],)))
+            # Below
+            if p[1] < 9:
+                if self.board[p[0], p[1]+1, p[2]] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2],)))
+            # Left
+            if p[2] > 0:
+                if self.board[p[0], p[1], p[2]-1] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1],) + (p[2]-1,)))
+            # Right
+            if p[2] < 9:
+                if self.board[p[0], p[1], p[2]+1] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1],) + (p[2]+1,)))
+            # Above-right
+            if p[1] > 0 and p[2] < 9:
+                if self.board[p[0], p[1]-1, p[2]+1] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2]+1,)))
+            # Above-left
+            if p[1] > 0 and p[2] > 0:
+                if self.board[p[0], p[1]-1, p[2]-1] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2]-1,)))
+            # Below-right
+            if p[1] < 9 and p[2] < 9:
+                if self.board[p[0], p[1]+1, p[2]+1] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2]+1,)))
+            # Below-left
+            if p[1] < 9 and p[2] > 0:
+                if self.board[p[0], p[1]+1, p[2]-1] == " ":
+                    pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2]-1,)))
 
-                pos[position] = pos_list
+            pos[position] = pos_list
 
-                return pos
+            return pos
 
-            else:
-                BattleShip.neighbor(board, position)
-
-        except IndexError as ie:
-            print(f"""{ie}
-            REMEMBER: your board is shape {board.shape}.
-                -Your board must have a shape of (2, 10, 10)
-                -The position must belong within the board bonds
-            """)
+        else:
+            BattleShip.neighbor(self, position)
 
     def boat_placer(self, position=tuple, length=int):
         """
@@ -178,6 +164,7 @@ class BattleShip:
         """
         Description
         """
+        c_y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
         # First get the tuple shot
         # shot is an array of two dimensions of type tuple
         if enemy.id != 'Machine':
@@ -187,14 +174,16 @@ class BattleShip:
                 # Writing the shot in the enemys's matrix 0 and to the matrix 1 of the machine
                 if enemy.board[shot] == "O": # Boat
                     enemy.board[shot] = "X"
+                    enemy.life -= 1
                     self.board[1, shot[1], shot[2]] = "X"
+                    return BattleShip.shot(self, enemy, difficulty='easy')
 
                 elif enemy.board[shot] == " ": # Water
                     enemy.board[shot] = "+"
                     self.board[1, shot[1], shot[2]] = "+"
 
                 else: # If it's 'X' or '+'
-                    BattleShip.shot(self, enemy)
+                    BattleShip.shot(self, enemy, difficulty='easy')
 
             else: # Difficulty = 'normal'
                 # Code
@@ -204,28 +193,47 @@ class BattleShip:
             print("Select a position to shoot.")
 
             # Asking for coordinates
-            y = (int(input("Vertical axis:")),)
-            x = (int(input("Horizontal axis:")),)
+            y_str = input("\tHorizontal axis:").upper()
+            y = 0
+            x = 0
+            # EASTER EGG
+            if y_str == "NUKE":
+                print('\nBoOoOoOoOoOoOoM!\n')
+                enemy.life = 0
+
+            elif y_str.isalpha():
+                y = (c_y.index(y_str),)
+                x = (int(input("\tVertical axis:")) - 1,)
+
+            else:
+                print('\nYou typed a wrong character.')
+                return BattleShip.shot(self, enemy, difficulty='easy')
+
             shot = (0,) + y + x
-            print(y + x)
+            print(f'{c_y[y[0]]}, {x[0]+1}')
 
             # Writing the shot in the machine's matrix 0 and to the matrix 1 of the enemy
             if enemy.board[shot] in ['O', " "]:
 
                 if enemy.board[shot] == "O": # Boat
                     enemy.board[shot] = "X"
+                    enemy.life -= 1
                     self.board[1, shot[1], shot[2]] = "X"
+                    return print(f'You reached the opponent!'), BattleShip.shot(self, enemy, difficulty='easy')
 
                 else: # Water
                     enemy.board[shot] = "+"
                     self.board[1, shot[1], shot[2]] = "+"
 
             else:
-                print("Coordinates already chosen before, try again.")
-                BattleShip.shot(self, enemy)
+                print("Coordinates already chosen before, try again.\n")
+                return BattleShip.shot(self, enemy, difficulty='easy')
     
     def boat_placer_loop(self):
-        
+        """
+        The function to gather the neccesary functions and loop them
+        for every typeof boat.
+        """
         # Keys are the boat length and values the number of boats per key
         for k, v in self.boats.items():
             for i in range(v):
@@ -233,3 +241,44 @@ class BattleShip:
                 u_p = BattleShip.rand_point(self)
                 # Placing it
                 BattleShip.boat_placer(self, u_p, k)
+
+    def board_printer(self):
+        """
+        A function to convert the board array into a string and be able to polish it and
+        give color to specific characters.
+        """
+        c_x = ['   1' , '  2', '  3', '  4', '  5', '  6', '  7', '  8', '  9', '  10']
+        c_y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+
+        # Splitting the board by two
+        p_board = array2string(self.board)[2:-2].split('\n')
+        above = p_board[:10]
+        under = p_board[11:]
+
+        # Above board
+        for r in above:
+            r = r.strip()[1:-1].replace(']', '')
+            for i in r:
+                # Turn to red
+                if i == 'X':
+                    r = r.replace(i, '\033[91m'+i+'\033[0m')
+                # Turen to blue
+                if i == '+':
+                    r = r.replace(i, '\033[94m'+i+'\033[0m')
+            print('  '+r)
+
+        print()
+
+        # Under board
+        print(*c_x) # Printing numbers
+        for r, e in zip(under, c_y):
+            r = r.strip()[1:-1].replace('[', '')
+            for i in r:
+                # Truen to red
+                if i == 'X':
+                    r = r.replace(i, '\033[91m'+i+'\033[0m')
+                # Turen to blue
+                if i == '+':
+                    r = r.replace(i, '\033[94m'+i+'\033[0m')
+                    # print(i)
+            print(e, r)

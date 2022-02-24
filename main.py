@@ -14,22 +14,40 @@ Rules:
 
 Legend:
     O: Single boat cell
-    X: Boat shooted
-    " ": Water
-    +: Water shooted
+    \033[91m'X'\033[0m: Boat shooted
+    ' ': Water
+    \033[94m+\033[0m: Water shooted
 """)
-sleep(10)
-print()
+sleep(1)
 print("Generating boards...")
-sleep(2)
+sleep(5)
+print()
 
 # Creating boards and placing boats
 machine.boat_placer_loop()
 user.boat_placer_loop()
-print(user.board)
+user.board_printer()
 
-m_lifes = 20
-u_lifes = 20
+while machine.life > 0 and user.life > 0:
 
-# while m_lifes > 0 or u_lifes > 0:
-#     pass
+    try:
+        print('Your turn:')
+        user.shot(machine)
+        user.board_printer()
+
+        print()
+        sleep(3)
+
+        print('Machine turn:')
+        print(f'\tRemaining {machine.id} lifes: {machine.life}')
+        machine.shot(user)
+        user.board_printer()
+
+    except:
+        break
+
+if machine.life == 0:
+    print('Awesome! You showed that bastard humans still are in the top chain.')
+
+else:
+    print('Enjoy your last days... This is the beginning of a machine revolution.')
