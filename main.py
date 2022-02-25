@@ -50,4 +50,4 @@ if machine.life == 0:
     print('Awesome! You showed that bastard humans still are in the top chain.')
 
 else:
-    print('Enjoy your last days... This is the beginning of a machine revolution.')
+    print('\nYou lose.\nEnjoy your last days... This is the beginning of a machine revolution.')
