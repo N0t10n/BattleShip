@@ -2,8 +2,8 @@ from functions import BattleShip as bs
 from time import sleep
 
 # Variables
-machine = bs('Machine')
-user = bs(input("Username:"))
+machine = bs('Machine', 'easy')
+user = bs(input("Username: "))
 
 print(f"""Hi {user.id}, let's play BattleShip!
 
@@ -32,22 +32,22 @@ while machine.life > 0 and user.life > 0:
 
     try:
         print('Your turn:')
-        user.shot(machine)
+        user.shooting(machine)
         user.board_printer()
 
         print()
-        sleep(3)
+        sleep(2)
 
         print('Machine turn:')
         print(f'\tRemaining {machine.id} lifes: {machine.life}')
-        machine.shot(user)
+        machine.shooting(user, 'easy')
         user.board_printer()
 
     except:
         break
 
 if machine.life == 0:
-    print('Awesome! You showed that bastard humans still are in the top chain.')
+    print('\nAwesome! You showed that bastard humans still are in the top chain.')
 
 else:
     print('\nYou lose.\nEnjoy your last days... This is the beginning of a machine revolution.')

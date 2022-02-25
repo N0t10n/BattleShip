@@ -1,4 +1,5 @@
 from numpy import random, full, array2string
+from random import randrange
 
 class BattleShip:
     """
@@ -15,21 +16,17 @@ class BattleShip:
         -
     """
 
-    def __init__(self, id=str):
+    def __init__(self, id=str, difficulty=None):
         self.id = id
-        self.board = full((2, 10, 10), " ")
-        self.boats = {1:4, 2:3, 3:2, 4:1}
         self.life = 20 # Total number of boat cells
+        self.board = full((2, 10, 10), " ")
+        self.boats = {4:1, 3:2, 2:3, 1:4}
+        self.difficulty = difficulty
     
     def rand_point(self, matrix=0):
         """
         Calculates a random point in the array.
-
-        Parameters:
-            -matrix: type int. The matrix where the point is generated.
-        
-        Return:
-            A random point in the given matrix of type tuple.
+        Return a position of type tuple.
         """
         point = (matrix,) + tuple(random.randint((self.board.shape[1], self.board.shape[2])))
 
@@ -40,199 +37,251 @@ class BattleShip:
             return BattleShip.rand_point(self)
             
     
-    def neighbor(self, position=tuple):
+    def neighbor(self, position=tuple, level=int):
         """
-        Finds all possible free positions arround the given position argument.
-
-        Parameters:
-            -position: type tuple. The position where the function will work on.
-
-        Return:
-            A dictionary with the position argument as key,
-            and a list of matrices positions of type tuple as value.
+        Find all possible free positions arround the given positional argument.
+        Return a dictionary with occupied positions in True and free in False.
         """
         p = position
-        pos_list = []
-        pos = {}
+        pos_dict = {True: 0, False: 0}
+        true = []
+        false = []
 
-        if self.board[p] == " ":
-            # Above
-            if p[1] > 0:
-                if self.board[p[0], p[1]-1, p[2]] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2],)))
-            # Below
-            if p[1] < 9:
-                if self.board[p[0], p[1]+1, p[2]] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2],)))
-            # Left
-            if p[2] > 0:
-                if self.board[p[0], p[1], p[2]-1] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1],) + (p[2]-1,)))
-            # Right
-            if p[2] < 9:
-                if self.board[p[0], p[1], p[2]+1] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1],) + (p[2]+1,)))
-            # Above-right
-            if p[1] > 0 and p[2] < 9:
-                if self.board[p[0], p[1]-1, p[2]+1] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2]+1,)))
-            # Above-left
-            if p[1] > 0 and p[2] > 0:
-                if self.board[p[0], p[1]-1, p[2]-1] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1]-1,) + (p[2]-1,)))
-            # Below-right
-            if p[1] < 9 and p[2] < 9:
-                if self.board[p[0], p[1]+1, p[2]+1] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2]+1,)))
-            # Below-left
-            if p[1] < 9 and p[2] > 0:
-                if self.board[p[0], p[1]+1, p[2]-1] == " ":
-                    pos_list.append(tuple((p[0],) + (p[1]+1,) + (p[2]-1,)))
+        # Above
+        if p[1] > 0:
+            pos = (level,) + (p[1]-1,) + (p[2],)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
 
-            pos[position] = pos_list
+        # Below
+        if p[1] < 9:
+            pos = (level,) + (p[1]+1,) + (p[2],)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
 
-            return pos
+        # Left
+        if p[2] > 0:
+            pos = (level,) + (p[1],) + (p[2]-1,)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
 
-        else:
-            BattleShip.neighbor(self, position)
+        # Right
+        if p[2] < 9:
+            pos = (level,) + (p[1],) + (p[2]+1,)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
+
+        # Above-right
+        if p[1] > 0 and p[2] < 9:
+            pos = (level,) + (p[1]-1,) + (p[2]+1,)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
+
+        # Above-left
+        if p[1] > 0 and p[2] > 0:
+            pos = (level,) + (p[1]-1,) + (p[2]-1,)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
+
+        # Below-right
+        if p[1] < 9 and p[2] < 9:
+            pos = (level,) + (p[1]+1,) + (p[2]+1,)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
+
+        # Below-left
+        if p[1] < 9 and p[2] > 0:
+            pos = (level,) + (p[1]+1,) + (p[2]-1,)
+            if self.board[pos] == " ":
+                false.append(pos)
+            else:
+                true.append(pos)
+
+        pos_dict[True] = true
+        pos_dict[False] = false
+
+        return pos_dict
+
 
     def boat_placer(self, position=tuple, length=int):
         """
-        From position this function calculates all possible directions where a boat can be placed.
-        Once got that, randomly gets a direction and finally place the boat in the board.
-
-        Return:
-            Nothing. Rewrites the self.board
+        From position this function calculates all possible directions where a boat can be headed.
+        Once got that, chooses a direction randomly and places the boat in the board.
+        Rewrites the board.
         """
         p = position
-        l = length
+        l = length - 1
         c = {"N":0, "S":0, "E":0, "W":0} # Coordinates
-
-        if self.board[p] == " ":
+        
+        if BattleShip.neighbor(self, p, 0)[True] == []:
             # Vertical axis
-            # Down
+            # SOUTH
             if p[1]+l < 10:
-                x = self.board[(0,), p[1]:p[1]+l, p[2]] == " "
-                if x.all() == True:
+                if BattleShip.neighbor(self, (p[0], p[1]+l, p[2]), 0)[True] == []:
                     c['S'] = 1
-            # Up
+
+            # NORTH
             if p[1]-l >= 0:
-                x = self.board[(0,), p[1]:p[1]-l:-1, p[2]] == " "
-                if x.all() == True:
+                if BattleShip.neighbor(self, (p[0], p[1]-l, p[2]), 0)[True] == []:
                     c['N'] = 1
 
             # Horizontal axis
-            # Right
+            # EAST
             if p[2]+l < 10:
-                x = self.board[(0,), p[1], p[2]:p[2]+l] == " "
-                if x.all() == True:
+                if BattleShip.neighbor(self, (p[0], p[1], p[2]+l), 0)[True] == []:
                     c['E'] = 1
-            # Left
+
+            # WEST
             if p[2]-l >= 0:
-                x = self.board[(0,), p[1], p[2]:p[2]-l:-1] == " "
-                if x.all() == True:
+                if BattleShip.neighbor(self, (p[0], p[1], p[2]-l), 0)[True] == []:
                     c['W'] = 1
-            
+                
             # Here compares which direction is equal to True to be listed in "d"
             d = [k for k, v in c.items() if v == True] # Directions
 
             if d == []:
-                # It's executed is the position doesn't have any possible direction
                 return BattleShip.boat_placer(self, BattleShip.rand_point(self), length)
-
+            
             else:
-            # With the all possible directions now randomly stores one of them
-                rand_d = random.choice(d)
+                i = randrange(len(d))
+                o = d[i]
+                
+                if o == "N":
+                    self.board[0, p[1]-l:p[1]+1, p[2]] = "O"
 
-                # And finally here replaces those free spaces into "O" in the board
-                if rand_d == "N":
-                    f_p = ((0,), p[1]+1-l, p[2])
-                    self.board[(0,), p[1]:p[1]-l:-1, p[2]] = "O"
-                elif rand_d == "S":
-                    self.board[(0,), p[1]:p[1]+l, p[2]] = "O"
-                elif rand_d == "W":
-                    f_p = ((0,), p[1], p[2]+1-l)
-                    self.board[(0,), p[1], f_p[2]:p[2]+1] = "O"
+                elif o == "S":
+                    self.board[0, p[1]:p[1]+l+1, p[2]] = "O"
+
+                elif o == "W":
+                    self.board[0, p[1], p[2]-l:p[2]+1] = "O"
+
                 else: # d == "E":
-                    self.board[(0,), p[1], p[2]:p[2]+l] = "O"
-
+                    self.board[0, p[1], p[2]:p[2]+l+1] = "O"
         else:
-            # It's executed is the position is already "O"
             return BattleShip.boat_placer(self, BattleShip.rand_point(self), length)
 
-    def shot(self, enemy, difficulty='easy'):
+
+    def machine_shot(self, enemy, difficulty):
+        """
+        description
+        """
+        p = (0,) + tuple(random.randint(self.board.shape[1:]))
+
+        if difficulty == 'easy':
+
+            if enemy.board[p] == "O": # Boat
+                enemy.board[p] = "X"
+                enemy.life -= 1
+                self.board[1, p[1], p[2]] = "X"
+                return BattleShip.machine_shot(self, enemy, difficulty)
+
+            elif enemy.board[p] == " ": # Water
+                enemy.board[p] = "+"
+                self.board[1, p[1], p[2]] = "+"
+
+            else: # If it's 'X' or '+'
+                return BattleShip.machine_shot(self, enemy, difficulty)
+        
+        elif difficulty == 'normal':
+            list_shot = BattleShip.neighbor(p, 1)[False]
+
+            if enemy.board[p] == "O": # Boat
+                enemy.board[p] = "X"
+                enemy.life -= 1
+                self.board[1, p[1], p[2]] = "X"
+                return BattleShip.machine_shot(self, enemy, difficulty)
+
+            elif enemy.board[p] == " ": # Water
+                enemy.board[p] = "+"
+                self.board[1, p[1], p[2]] = "+"
+
+            else: # If it's 'X' or '+'
+                return BattleShip.machine_shot(self, enemy, difficulty)
+
+        else: # difficulty == 'god':
+            pass
+        
+
+    def user_shot(self, enemy, position=tuple):
+        """
+        description
+        """
+        p = position
+
+        if enemy.board[p] in ['O', " "]:
+
+            if enemy.board[p] == "O": # Boat
+                enemy.board[p] = "X"
+                enemy.life -= 1
+                self.board[1, p[1], p[2]] = "X"
+                return print(f'You reached the opponent!'), BattleShip.user_shot(self, enemy, position)
+
+            else: # Water
+                enemy.board[p] = "+"
+                self.board[1, p[1], p[2]] = "+"
+
+        else:
+            print("Coordinates already chosen before, try again.\n")
+            return BattleShip.user_shot(self, enemy, position)
+
+
+    def shooting(self, enemy, difficulty=None):
         """
         Description
         """
-        c_y = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-        # First get the tuple shot
-        # shot is an array of two dimensions of type tuple
-        if enemy.id != 'Machine':
-            if difficulty == 'easy':
-                shot = (0,) + tuple(random.randint(self.board.shape[1:]))
-
-                # Writing the shot in the enemys's matrix 0 and to the matrix 1 of the machine
-                if enemy.board[shot] == "O": # Boat
-                    enemy.board[shot] = "X"
-                    enemy.life -= 1
-                    self.board[1, shot[1], shot[2]] = "X"
-                    return BattleShip.shot(self, enemy, difficulty='easy')
-
-                elif enemy.board[shot] == " ": # Water
-                    enemy.board[shot] = "+"
-                    self.board[1, shot[1], shot[2]] = "+"
-
-                else: # If it's 'X' or '+'
-                    BattleShip.shot(self, enemy, difficulty='easy')
-
-            else: # Difficulty = 'normal'
-                # Code
-                pass
+        c_x = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+        
+        if enemy.id != 'Machine': # If the shooter is the machine
+            return BattleShip.machine_shot(self, enemy, difficulty)
             
         else: # If the shooter is the user
             print("Select a position to shoot.")
 
             # Asking for coordinates
-            y_str = input("\tHorizontal axis:").upper()
-            y = 0
+            x_str = input("\tHorizontal axis: ").upper()
             x = 0
-            # EASTER EGG
-            if y_str == "NUKE":
-                print('\nBoOoOoOoOoOoOoM!\n')
-                enemy.life = 0
+            y = 0
 
-            elif y_str.isalpha():
-                y = (c_y.index(y_str),)
-                x = (int(input("\tVertical axis:")) - 1,)
+            ## EASTER EGG
+            if x_str == "NUKE":
+                print('\nBoOoOoOoOoOoOoM!\n')
+                self.board[1, :, :] = 'X'
+                self.board_printer()
+                enemy.life = 0
+            ## END EASTER EGG
+
+            elif x_str in c_x:
+                x = (c_x.index(x_str),)
+                y = (int(input("\tVertical axis: ")) - 1,)
 
             else:
                 print('\nYou typed a wrong character.')
-                return BattleShip.shot(self, enemy, difficulty='easy')
+                return BattleShip.shooting(self, enemy)
 
-            shot = (0,) + y + x
-            print(f'{c_y[y[0]]}, {x[0]+1}')
+            shot = (0,) + x + y
+            print(f'{c_x[x[0]]}, {y[0]+1}')
 
-            # Writing the shot in the machine's matrix 0 and to the matrix 1 of the enemy
-            if enemy.board[shot] in ['O', " "]:
+            return BattleShip.user_shot(self, enemy, shot)
 
-                if enemy.board[shot] == "O": # Boat
-                    enemy.board[shot] = "X"
-                    enemy.life -= 1
-                    self.board[1, shot[1], shot[2]] = "X"
-                    return print(f'You reached the opponent!'), BattleShip.shot(self, enemy, difficulty='easy')
 
-                else: # Water
-                    enemy.board[shot] = "+"
-                    self.board[1, shot[1], shot[2]] = "+"
-
-            else:
-                print("Coordinates already chosen before, try again.\n")
-                return BattleShip.shot(self, enemy, difficulty='easy')
-    
     def boat_placer_loop(self):
         """
         The function to gather the neccesary functions and loop them
-        for every typeof boat.
+        for every type of boat.
         """
         # Keys are the boat length and values the number of boats per key
         for k, v in self.boats.items():
@@ -241,6 +290,7 @@ class BattleShip:
                 u_p = BattleShip.rand_point(self)
                 # Placing it
                 BattleShip.boat_placer(self, u_p, k)
+
 
     def board_printer(self):
         """
@@ -255,30 +305,29 @@ class BattleShip:
         above = p_board[:10]
         under = p_board[11:]
 
-        # Above board
+        # Top board
         for r in above:
             r = r.strip()[1:-1].replace(']', '')
             for i in r:
                 # Turn to red
                 if i == 'X':
                     r = r.replace(i, '\033[91m'+i+'\033[0m')
-                # Turen to blue
+                # Turn to blue
                 if i == '+':
                     r = r.replace(i, '\033[94m'+i+'\033[0m')
             print('  '+r)
 
         print()
 
-        # Under board
+        # Bottom board
         print(*c_x) # Printing numbers
         for r, e in zip(under, c_y):
             r = r.strip()[1:-1].replace('[', '')
             for i in r:
-                # Truen to red
+                # Turn to red
                 if i == 'X':
                     r = r.replace(i, '\033[91m'+i+'\033[0m')
-                # Turen to blue
+                # Turn to blue
                 if i == '+':
                     r = r.replace(i, '\033[94m'+i+'\033[0m')
-                    # print(i)
             print(e, r)
