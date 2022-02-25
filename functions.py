@@ -1,5 +1,5 @@
 from numpy import random, full, array2string
-from random import randrange
+from random import choice
 
 class BattleShip:
     """
@@ -157,8 +157,7 @@ class BattleShip:
                 return BattleShip.boat_placer(self, BattleShip.rand_point(self), length)
             
             else:
-                i = randrange(len(d))
-                o = d[i]
+                o = choice(d)
                 
                 if o == "N":
                     self.board[0, p[1]-l:p[1]+1, p[2]] = "O"
@@ -175,7 +174,7 @@ class BattleShip:
             return BattleShip.boat_placer(self, BattleShip.rand_point(self), length)
 
 
-    def machine_shot(self, enemy, difficulty):
+    def machine_shot(self, enemy, difficulty, around=None):
         """
         description
         """
@@ -187,30 +186,49 @@ class BattleShip:
                 enemy.board[p] = "X"
                 enemy.life -= 1
                 self.board[1, p[1], p[2]] = "X"
-                return BattleShip.machine_shot(self, enemy, difficulty)
+                return BattleShip.machine_shot(self, enemy, difficulty, around)
 
             elif enemy.board[p] == " ": # Water
                 enemy.board[p] = "+"
                 self.board[1, p[1], p[2]] = "+"
 
             else: # If it's 'X' or '+'
-                return BattleShip.machine_shot(self, enemy, difficulty)
+                return BattleShip.machine_shot(self, enemy, difficulty, around)
         
         elif difficulty == 'normal':
-            list_shot = BattleShip.neighbor(p, 1)[False]
 
-            if enemy.board[p] == "O": # Boat
-                enemy.board[p] = "X"
-                enemy.life -= 1
-                self.board[1, p[1], p[2]] = "X"
-                return BattleShip.machine_shot(self, enemy, difficulty)
+            if type(around) == None:
 
-            elif enemy.board[p] == " ": # Water
-                enemy.board[p] = "+"
-                self.board[1, p[1], p[2]] = "+"
+                if enemy.board[p] == "O": # Boat
+                    enemy.board[p] = "X"
+                    enemy.life -= 1
+                    self.board[1, p[1], p[2]] = "X"
 
-            else: # If it's 'X' or '+'
-                return BattleShip.machine_shot(self, enemy, difficulty)
+                    # Finding empty spots around
+                    list_shot = BattleShip.neighbor(self, p, 1)[False]
+                    ar = choice(list_shot)
+                    return BattleShip.machine_shot(self, enemy, difficulty, ar)
+
+                elif enemy.board[p] == " ": # Water
+                    enemy.board[p] = "+"
+                    self.board[1, p[1], p[2]] = "+"
+
+                else: # If it's 'X' or '+'
+                    return BattleShip.machine_shot(self, enemy, difficulty, around)
+
+            else: # If around is tuple -> a position around the hit
+                if enemy.board[around] == "O": # Boat
+                    enemy.board[around] = "X"
+                    enemy.life -= 1
+                    self.board[1, around[1], around[2]] = "X"
+                    return BattleShip.machine_shot(self, enemy, difficulty, around)
+
+                elif enemy.board[around] == " ": # Water
+                    enemy.board[around] = "+"
+                    self.board[1, around[1], around[2]] = "+"
+
+                else: # If it's 'X' or '+'
+                    return BattleShip.machine_shot(self, enemy, difficulty, around)
 
         else: # difficulty == 'god':
             pass
@@ -239,14 +257,14 @@ class BattleShip:
             return BattleShip.user_shot(self, enemy, position)
 
 
-    def shooting(self, enemy, difficulty=None):
+    def shooting(self, enemy, difficulty=None, around=None):
         """
         Description
         """
         c_x = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
         
         if enemy.id != 'Machine': # If the shooter is the machine
-            return BattleShip.machine_shot(self, enemy, difficulty)
+            return BattleShip.machine_shot(self, enemy, difficulty, around)
             
         else: # If the shooter is the user
             print("Select a position to shoot.")
@@ -258,9 +276,9 @@ class BattleShip:
 
             ## EASTER EGG
             if x_str == "NUKE":
-                print('\nBoOoOoOoOoOoOoM!\n')
                 self.board[1, :, :] = 'X'
                 self.board_printer()
+                print('\nBoOoOoOoOoOoOoM!\n')
                 enemy.life = 0
             ## END EASTER EGG
 

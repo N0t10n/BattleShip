@@ -1,8 +1,7 @@
 from functions import BattleShip as bs
 from time import sleep
 
-# Variables
-machine = bs('Machine', 'easy')
+
 user = bs(input("Username: "))
 
 print(f"""Hi {user.id}, let's play BattleShip!
@@ -18,9 +17,13 @@ Legend:
     ' ': Water
     \033[94m+\033[0m: Water shooted
 """)
+
+sleep(5)
+diff = input("Choose the machine difficulty between; easy and normal: ").lower()
+machine = bs('Machine', diff)
 sleep(1)
 print("Generating boards...")
-sleep(5)
+sleep(1)
 print()
 
 # Creating boards and placing boats
@@ -40,14 +43,14 @@ while machine.life > 0 and user.life > 0:
 
         print('Machine turn:')
         print(f'\tRemaining {machine.id} lifes: {machine.life}')
-        machine.shooting(user, 'easy')
+        machine.shooting(user, machine.difficulty)
         user.board_printer()
 
     except:
         break
 
 if machine.life == 0:
-    print('\nAwesome! You showed that bastard humans still are in the top chain.')
+    print('Awesome! You showed that bastard humans still are in the top chain.')
 
 else:
     print('\nYou lose.\nEnjoy your last days... This is the beginning of a machine revolution.')
