@@ -18,8 +18,15 @@ Legend:
     \033[94m+\033[0m: Water shooted
 """)
 
-sleep(5)
-diff = input("Choose the machine difficulty between; easy and normal: ").lower()
+sleep(2)
+# Making sure user type's good
+while 1:
+    diff = input("Choose the machine difficulty between; cpu and gpu: ").lower()
+    if diff == 'cpu' or diff == 'gpu':
+        break
+    else:
+        print("\nDidn't match with cpu not gpu.")
+
 machine = bs('Machine', diff)
 sleep(1)
 print("Generating boards...")
