@@ -1,7 +1,6 @@
 from functions import BattleShip as bs
 from time import sleep
 
-
 user = bs(input("Username: "))
 
 print(f"""Hi {user.id}, let's play BattleShip!

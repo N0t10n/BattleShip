@@ -359,7 +359,7 @@ class BattleShip:
                 if i == '+':
                     r = r.replace(i, '\033[94m'+i+'\033[0m')
             print('  '+r)
-
+        
         print()
 
         # Bottom board
@@ -373,4 +373,5 @@ class BattleShip:
                 # Turn to blue
                 if i == '+':
                     r = r.replace(i, '\033[94m'+i+'\033[0m')
+
             print(e, r)
